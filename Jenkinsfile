@@ -75,8 +75,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-key') {
-                       sh 'docker buildx build --platform linux/amd64,linux/arm64 --tag arpita199812/boardgame-project:18 .'
-                       sh 'docker push arpita199812/boardgame-project:18'
+                    sh  'docker buildx build --platform linux/amd64,linux/arm64 -t arpita199812/boardgame-project:18 --push .'
+                       
                     }
                 }
             }
