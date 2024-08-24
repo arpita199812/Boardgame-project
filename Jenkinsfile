@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         // Specify the SonarQube environment name from Jenkins global configuration
-        SONARQUBE_ENV = 'SonarQube'
+        SCANNER_HOME = 'sonar-scanner'
     }
 
     stages {
@@ -20,42 +20,44 @@ pipeline {
 
         stage('Clean') {
             steps {
-                bat 'mvn clean'
+                sh 'mvn clean'
             }
         }
 
         stage('Compile') {
             steps {
-                bat 'mvn compile'
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    // Run SonarQube analysis
-                    withSonarQubeEnv(SONARQUBE_ENV) {
-                        bat 'mvn sonar:sonar -Dsonar.projectKey=Boardgame-project'
-                    }
-                }
+                sh 'mvn compile'
             }
         }
 
         stage('Test') {
             steps {
-                bat 'mvn test'
+                sh 'mvn test'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    // Run SonarQube analysis
+                    withSonarQubeEnv('sonar-server') {
+                        sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Boardgame-project -Dsonar.projectKey=Broadgame-project \
+                        -Dsonar.java.binaries=target'''
+
+                        sh "echo $SCANNER_HOME"
+                    }
+                }
             }
         }
 
         stage('Package') {
             steps {
-                bat 'mvn package'
+                sh 'mvn package'
             }
         }
 
         stage('Install') {
             steps {
-                bat 'mvn install'
+                sh 'mvn install'
             }
         }
     }
