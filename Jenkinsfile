@@ -75,7 +75,8 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', 'docker-hub-id') {
-                        sh 'docker buildx build -t arpita199812/boardgame-project:18 . --push'
+                       sh 'docker buildx build -t arpita199812/boardgame-project:18 .'
+                       sh 'docker push arpita199812/boardgame-project:18'
                     }
                 }
             }
