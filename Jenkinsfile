@@ -12,7 +12,7 @@ pipeline {
     }
 
     stages {
-        stage('Git-Checkout') {
+        stage('Git Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/arpita199812/Boardgame-project.git'
             }
@@ -40,8 +40,8 @@ pipeline {
             steps {
                 script {
                     withSonarQubeEnv('sonar-server') {
-                        sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Boardgame-project -Dsonar.projectKey=Broadgame-project \
-                        -Dsonar.java.binaries=target'''
+                        sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Boardgame-project \
+                            -Dsonar.projectKey=Boardgame-project -Dsonar.java.binaries=target'''
                     }
                 }
             }
@@ -52,38 +52,39 @@ pipeline {
                 sh 'mvn package'
             }
         }
+
         stage('Docker Login') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'docker-hub-id', variable: 'DOCKER_PASS')]) {
-                        sh 'echo $DOCKER_PASS | docker login -u arpita199812 --password-stdin'
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-id', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                     }
                 }
             }
         }
+
         stage('Set up Docker Buildx') {
             steps {
                 script {
-                    sh 'docker buildx --version || docker buildx create --use'
+                    sh 'docker buildx version || docker buildx create --use'
                 }
             }
         }
 
         stage('Docker Build and Push') {
-           steps {
-               script {
-                   docker.withRegistry('', 'docker-hub-id') {
-                       sh 'docker buildx build -t arpita199812/boardgame-project:18 .'
-                       sh 'docker push arpita199812/boardgame-project:18'
-                   }
-               }
-           }
-       }
+            steps {
+                script {
+                    docker.withRegistry('', 'docker-hub-id') {
+                        sh 'docker buildx build -t arpita199812/boardgame-project:18 . --push'
+                    }
+                }
+            }
+        }
 
         stage('Trivy Scan') {
             steps {
                 script {
-                   sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image arpita199812/boardgame-project:18'
+                    sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image arpita199812/boardgame-project:18'
                 }
             }
         }
@@ -99,15 +100,15 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Run the Docker container
                     sh 'docker run -d -p 8080:8080 --name boardgame-container arpita199812/boardgame-project:18'
                 }
             }
         }
+    }
 
-       post {
-          always {
-             archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
+    post {
+        always {
+            archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
         }
 
         success {
