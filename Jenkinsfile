@@ -57,7 +57,7 @@ pipeline {
             steps {
                 script {
                    withCredentials([usernamePassword(credentialsId: 'docker-hub-key', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin https://index.docker.io/v1/'
                     }
                 }
             }
@@ -74,7 +74,7 @@ pipeline {
         stage('Docker Build and Push') {
             steps {
                 script {
-                    docker.withRegistry('https://www.docker.com/', 'docker-hub-key') {
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-key') {
                        sh 'docker buildx build -t arpita199812/boardgame-project:18 .'
                        sh 'docker push arpita199812/boardgame-project:18'
                     }
