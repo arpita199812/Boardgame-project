@@ -73,7 +73,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', 'docker-hub-id') {
-                        def app = 'docker buildx build -t arpita199812/boardgame-project:18 .')
+                        def app = ('docker buildx build -t arpita199812/boardgame-project:18')
                         app.push()
                     }
                 }
