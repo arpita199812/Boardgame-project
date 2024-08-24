@@ -70,20 +70,20 @@ pipeline {
         }
 
         stage('Docker Build and Push') {
-            steps {
-                script {
-                    docker.withRegistry('', 'docker-hub-id') {
-                        def app = ('docker buildx build -t arpita199812/boardgame-project:18')
-                        app.push()
-                    }
-                }
-            }
-        }
+           steps {
+               script {
+                   docker.withRegistry('', 'docker-hub-id') {
+                       sh 'docker buildx build -t arpita199812/boardgame-project:18 .'
+                       sh 'docker push arpita199812/boardgame-project:18'
+                   }
+               }
+           }
+       }
 
         stage('Trivy Scan') {
             steps {
                 script {
-                    sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image arpita199812/boardgame-project:${env.BUILD_NUMBER}'
+                   sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image arpita199812/boardgame-project:18'
                 }
             }
         }
@@ -91,7 +91,7 @@ pipeline {
         stage('OWASP ZAP Scan') {
             steps {
                 script {
-                    sh 'docker run --rm -v $(pwd):/zap/wrk/:rw -t  zaproxy/zap-stable zap-baseline.py -t http://3.87.190.86:8080 -r zap_report.html'
+                    sh 'docker run --rm -v ${WORKSPACE}:/zap/wrk/:rw -t zaproxy/zap-stable zap-baseline.py -t http://3.87.190.86:8080 -r zap_report.html'
                 }
             }
         }
@@ -100,15 +100,14 @@ pipeline {
             steps {
                 script {
                     // Run the Docker container
-                    sh 'docker run -d -p 8080:8080 --name boardgame-container arpita1999812/boardgame-project:${env.BUILD_NUMBER}'
+                    sh 'docker run -d -p 8080:8080 --name boardgame-container arpita199812/boardgame-project:18'
                 }
             }
         }
-    }
 
-    post {
-        always {
-            archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
+       post {
+          always {
+             archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
         }
 
         success {
