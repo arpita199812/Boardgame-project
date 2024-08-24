@@ -66,7 +66,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('', 'docker-hub-id') {
-                        def app = docker.build("arpita199812/boardgame-project:${env.BUILD_NUMBER}")
+                        def app = 'docker build -t arpita199812/boardgame-project:18 .')
                         app.push()
                     }
                 }
