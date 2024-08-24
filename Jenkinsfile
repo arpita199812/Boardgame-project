@@ -56,7 +56,7 @@ pipeline {
         stage('Docker Build and Push') {
             steps {
                 script {
-                    docker.withRegistry('', 'docker-hub-id') {
+                    docker.withRegistry('sudo docker login -u arpita199812 --password-stdin', 'docker-hub-id') {
                         def app = docker.build("arpita199812/boardgame-project:${env.BUILD_NUMBER}")
                         app.push()
                     }
