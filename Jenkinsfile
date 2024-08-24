@@ -74,7 +74,7 @@ pipeline {
         stage('Docker Build and Push') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-id') {
+                    docker.withRegistry('https://hub.docker.com/', 'docker-hub-id') {
                        sh 'docker buildx build -t arpita199812/boardgame-project:18 .'
                        sh 'docker push arpita199812/boardgame-project:18'
                     }
