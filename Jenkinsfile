@@ -52,11 +52,20 @@ pipeline {
                 sh 'mvn package'
             }
         }
+        stage('Docker Login') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'docker-hub-id', variable: 'DOCKER_HUB_CREDENTIALS')]) {
+                        sh 'echo $DOCKER_HUB_CREDENTIALS | docker login -u arpita199812 --password-stdin'
+                    }
+                }
+            }
+        }
 
         stage('Docker Build and Push') {
             steps {
                 script {
-                    docker.withRegistry('sudo docker login -u arpita199812 --password-stdin', 'docker-hub-id') {
+                    docker.withRegistry('', 'docker-hub-id') {
                         def app = docker.build("arpita199812/boardgame-project:${env.BUILD_NUMBER}")
                         app.push()
                     }
