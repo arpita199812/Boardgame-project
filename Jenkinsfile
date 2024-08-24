@@ -61,12 +61,19 @@ pipeline {
                 }
             }
         }
+        stage('Set up Docker Buildx') {
+            steps {
+                script {
+                    sh 'docker buildx version || docker buildx create --use'
+                }
+            }
+        }
 
         stage('Docker Build and Push') {
             steps {
                 script {
                     docker.withRegistry('', 'docker-hub-id') {
-                        def app = 'docker build -t arpita199812/boardgame-project:18 .')
+                        def app = 'docker buildx build -t arpita199812/boardgame-project:18 .')
                         app.push()
                     }
                 }
