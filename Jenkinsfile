@@ -1,5 +1,5 @@
-pipeline { 
-    agent  { label 'slave-1'}
+pipeline {
+    agent { label 'slave-1' }
 
     tools {
         maven 'maven3'
@@ -7,8 +7,8 @@ pipeline {
     }
 
     environment {
-        // Specify the SonarQube environment name from Jenkins global configuration
-        SCANNER_HOME= tool 'sonar-scanner'
+        SCANNER_HOME = tool 'sonar-scanner'
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-id')
     }
 
     stages {
@@ -35,15 +35,13 @@ pipeline {
                 sh 'mvn test'
             }
         }
+
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    // Run SonarQube analysis
                     withSonarQubeEnv('sonar-server') {
-                        sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Boardgame-project -Dsonar.projectKey=Broadgame-project \
+                        sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Boardgame-project -Dsonar.projectKey=Broadgame-project \
                         -Dsonar.java.binaries=target'''
-
-                        sh "echo $SCANNER_HOME"
                     }
                 }
             }
@@ -55,22 +53,50 @@ pipeline {
             }
         }
 
-        stage('Install') {
+        stage('Docker Build and Push') {
             steps {
-                sh 'mvn install'
+                script {
+                    docker.withRegistry('', 'docker-hub-id') {
+                        def app = docker.build("arpita199812/boardgame-project:${env.BUILD_NUMBER}")
+                        app.push()
+                    }
+                }
+            }
+        }
+
+        stage('Trivy Scan') {
+            steps {
+                script {
+                    sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image arpita199812/boardgame-project:${env.BUILD_NUMBER}'
+                }
+            }
+        }
+
+        stage('OWASP ZAP Scan') {
+            steps {
+                script {
+                    sh 'docker run --rm -v $(pwd):/zap/wrk/:rw -t  zaproxy/zap-stable zap-baseline.py -t http://3.87.190.86:8080 -r zap_report.html'
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    // Run the Docker container
+                    sh 'docker run -d -p 8080:8080 --name boardgame-container arpita1999812/boardgame-project:${env.BUILD_NUMBER}'
+                }
             }
         }
     }
 
     post {
         always {
-            // Optional: Archive the SonarQube analysis report or other artifacts
             archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
         }
 
         success {
             script {
-                // Wait for the SonarQube analysis report to be processed on the server
                 timeout(time: 1, unit: 'HOURS') {
                     waitForQualityGate abortPipeline: true
                 }
@@ -78,7 +104,6 @@ pipeline {
         }
 
         failure {
-            // Send notifications or take other actions on failure
             echo 'Pipeline failed!'
         }
     }
