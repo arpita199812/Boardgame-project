@@ -1,5 +1,5 @@
-FROM adoptopenjdk/openjdk17
-  
+FROM adoptium/adoptium-openjdk:17-jdk
+
 EXPOSE 8080
  
 ENV APP_HOME /usr/src/app
