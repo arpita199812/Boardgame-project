@@ -56,8 +56,8 @@ pipeline {
         stage('Docker Login') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-hub-id', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                   withCredentials([string(credentialsId: 'docker-hub-id', variable: 'DOCKER_PASS')]) {
+                        sh 'echo $DOCKER_PASS | docker login -u arpita199812 --password-stdin'
                     }
                 }
             }
