@@ -64,7 +64,7 @@ pipeline {
         stage('Set up Docker Buildx') {
             steps {
                 script {
-                    sh 'docker buildx version || docker buildx create --use'
+                    sh 'docker buildx --version || docker buildx create --use'
                 }
             }
         }
