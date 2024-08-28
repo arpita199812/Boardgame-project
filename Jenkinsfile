@@ -13,7 +13,7 @@ pipeline {
         ECR_REPOSITORY = 'boardgame-project' 
         ECS_CLUSTER = 'Boardgame-proj-cluster' 
         ECS_SERVICE = 'broadgame-service' 
-        AWS_CREDENTIALS_ID = 'AWS-Credential-key' 
+        AWS_CREDENTIALS_ID = 'AWS_CREDENTIALS_ID' 
     }
 
     stages {
@@ -50,8 +50,8 @@ pipeline {
             steps {
                 script {
                     env.DEPENDENCYCHECK_APIKEY = '6d6f8a54-3927-4686-96ad-e7cd1eb26044'
-                     dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP'
-                     dependencyCheckPublisher pattern: '**/dependency-check-report.html'
+                    dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP'
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.html'
                 }
             }
         }
@@ -65,10 +65,10 @@ pipeline {
         stage('Docker Build & Push to ECR') {
             steps {
                 script {
-                    withAWS(credentials: 'AWS_CREDENTIALS_ID', region: 'us-east-1') {
-                    sh '''
+                    withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
+                        sh '''
                             # Log in to Amazon ECR
-                            $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 730335449419.dkr.ecr.us-east-1.amazonaws.com)
+                            $(aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 730335449419.dkr.ecr.us-east-1.amazonaws.com)
                             
                             # Build Docker image
                             docker build -t boardgame-project .
@@ -83,10 +83,11 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy to ECS') {
             steps {
                 script {
-                     withAWS(credentials: 'AWS_CREDENTIALS_ID', region: 'us-east-1') {
+                    withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
                         sh '''
                             # Update ECS service with the new image
                             aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE \
@@ -97,10 +98,9 @@ pipeline {
             }
         }
 
-
         stage('TRIVY') {
             steps {
-                sh 'trivy image $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:latest'
+                sh 'trivy image 730335449419.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest'
             }
         }
     }
