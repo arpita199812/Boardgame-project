@@ -45,7 +45,8 @@ pipeline {
             steps {
                 script {
                     env.DEPENDENCYCHECK_APIKEY = '6d6f8a54-3927-4686-96ad-e7cd1eb26044'
-                     dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP'
+                     dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP',
+                     dependencyCheckPublisher pattern: '/home/ubuntu/slave/workspace/pipeline/dependency-check-report.html'
                 }
             }
         }
@@ -71,13 +72,6 @@ pipeline {
             steps {
                 sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --scanners vuln arpita199812/boardgame-project:latest'
             }
-        }
-    }
-
-    post {
-        always {
-            // Publish Dependency-Check reports
-            dependencyCheckPublisher pattern: '/home/ubuntu/slave/workspace/pipeline/dependency-check-report.html'
         }
     }
 }
