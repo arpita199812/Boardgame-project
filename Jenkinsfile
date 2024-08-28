@@ -65,24 +65,28 @@ pipeline {
         stage('Docker Build & Push to ECR') {
             steps {
                 script {
-                    withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
-                        sh '''
-                            # Log in to Amazon ECR
-                            $(aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 730335449419.dkr.ecr.us-east-1.amazonaws.com)
-                            
-                            # Build Docker image
-                            docker build -t boardgame-project .
-                            
-                            # Tag Docker image
-                            docker tag boardgame-project:latest 730335449419.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest
-                            
-                            # Push Docker image to ECR
-                            docker push 730335449419.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest
-                        '''
-                    }
-                }
+                     withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
+                     sh '''
+                         # Get ECR login password and log in to Amazon ECR
+                         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 730335449419.dkr.ecr.us-east-1.amazonaws.com
+                    
+                        # Verify login
+                        docker info
+                    
+                        # Build Docker image
+                        docker build -t boardgame-project .
+                    
+                        # Tag Docker image
+                        docker tag boardgame-project:latest 730335449419.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest
+                    
+                        # Push Docker image to ECR
+                        docker push 730335449419.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest
+                     '''
+                   }
+               }
             }
         }
+
 
         stage('Deploy to ECS') {
             steps {
