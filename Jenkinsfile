@@ -77,7 +77,7 @@ pipeline {
     post {
         always {
             // Publish Dependency-Check reports
-            dependencyCheckPublisher pattern: 'dependency-check-report/dependency-check-report.xml'
+            dependencyCheckPublisher pattern: 'dependency-check-report/dependency-check-report.html'
         }
     }
 }
