@@ -11,7 +11,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
         AWS_REGION = 'us-east-1' 
         ECR_REPOSITORY = 'boardgame-project' 
-        ECS_CLUSTER = 'Boardgame-proj-cluster' 
+        ECS_CLUSTER = 'Broadgame-proj-cluster' 
         ECS_SERVICE = 'broadgame-service' 
         AWS_CREDENTIALS_ID = 'AWS_CREDENTIALS_ID' 
     }
@@ -93,9 +93,12 @@ pipeline {
                 script {
                     withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
                         sh '''
+                            # Check ECS cluster existence
+                            aws ecs describe-clusters --clusters ${ECS_CLUSTER} --region ${AWS_REGION}
+
                             # Update ECS service with the new image
-                            aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE \
-                            --force-new-deployment --region $AWS_REGION
+                            aws ecs update-service --cluster ${ECS_CLUSTER} --service ${ECS_SERVICE} \
+                            --force-new-deployment --region ${AWS_REGION}
                         '''
                     }
                 }
