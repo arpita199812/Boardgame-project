@@ -77,7 +77,7 @@ pipeline {
     post {
         always {
             // Publish Dependency-Check reports
-            dependencyCheckPublisher pattern: 'dependency-check-report/dependency-check-report.html'
+            dependencyCheckPublisher pattern: '/home/ubuntu/slave/workspace/pipeline/dependency-check-report.html'
         }
     }
 }
