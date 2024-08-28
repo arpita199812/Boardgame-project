@@ -56,7 +56,7 @@ pipeline {
         stage('Docker Build & Push') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'docker-hub-id', toolName: 'docker') {
+                    withDockerRegistry(credentialsId: 'dckr_pat_RbcgN4xuDHnHG02boDRo4Sh8hQU', toolName: 'docker') {
                         sh 'docker build -t image1 .'
                         sh 'docker tag image1 arpita199812/boardgame-project:latest'
                         sh 'docker push arpita199812/boardgame-project:latest'
