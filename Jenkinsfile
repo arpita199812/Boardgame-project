@@ -69,7 +69,7 @@ pipeline {
 
         stage('TRIVY') {
             steps {
-                sh 'trivy image arpita199812/boardgame-project:latest'
+                sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity HIGH,CRITICAL arpita199812/boardgame-project:18'
             }
         }
     }
