@@ -11,7 +11,6 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
         AWS_REGION = 'us-east-1' 
         ECR_REPOSITORY = 'boardgame-project' 
-        AWS_ACCOUNT_ID = '730335449419' 
         ECS_CLUSTER = 'Boardgame-proj-cluster' 
         ECS_SERVICE = 'broadgame-service' 
         AWS_CREDENTIALS_ID = 'AWS-Credential-key' 
@@ -66,7 +65,7 @@ pipeline {
         stage('Docker Build & Push to ECR') {
             steps {
                 script {
-                    withAWS(credentials: 'AWS-Credential-key', region: 'us-east-1') {
+                    withAWS(credentials: 'AWS_CREDENTIALS_ID', region: 'us-east-1') {
                     sh '''
                             # Log in to Amazon ECR
                             $(aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 730335449419.dkr.ecr.us-east-1.amazonaws.com)
@@ -87,9 +86,7 @@ pipeline {
         stage('Deploy to ECS') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: AWS_CREDENTIALS_ID, 
-                                                     passwordVariable: 'AWS_SECRET_ACCESS_KEY', 
-                                                     usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                     withAWS(credentials: 'AWS_CREDENTIALS_ID', region: 'us-east-1') {
                         sh '''
                             # Update ECS service with the new image
                             aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE \
@@ -103,7 +100,7 @@ pipeline {
 
         stage('TRIVY') {
             steps {
-                sh 'trivy image $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest'
+                sh 'trivy image $AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:latest'
             }
         }
     }
