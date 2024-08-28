@@ -60,8 +60,7 @@ pipeline {
             steps {
                 script {
                     docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
-                        sh 'docker build -t image1 .'
-                        sh 'docker tag image1 arpita199812/boardgame-project:latest'
+                        sh 'docker buildx build -t arpita199812/boardgame-project .'
                         sh 'docker push arpita199812/boardgame-project:latest'
                     }
                 }
