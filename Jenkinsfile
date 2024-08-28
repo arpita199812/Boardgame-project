@@ -1,4 +1,4 @@
-pipeline { 
+pipeline {
     agent { label 'slave-1' }
 
     tools {
@@ -8,7 +8,6 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-id')
     }
 
     stages {
@@ -18,19 +17,13 @@ pipeline {
             }
         }
 
-        stage('Clean') {
-            steps {
-                sh 'mvn clean'
-            }
-        }
-
         stage('Compile') {
             steps {
-                sh 'mvn compile'
+                sh 'mvn clean compile'
             }
         }
 
-        stage('Test') {
+        stage('Test Cases') {
             steps {
                 sh 'mvn test'
             }
@@ -47,81 +40,35 @@ pipeline {
             }
         }
 
-        stage('Package') {
+        stage('OWASP Dependency Check') {
             steps {
-                sh 'mvn package'
+                dependencyCheck additionalArguments: '--scan ./ --format HTML', odcInstallation: 'DP'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
 
-        stage('Docker Login') {
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+
+        stage('Docker Build & Push') {
             steps {
                 script {
-                   withCredentials([usernamePassword(credentialsId: 'docker-hub-key', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin https://index.docker.io/v1/'
+                    withDockerRegistry(credentialsId: 'docker-hub-id', toolName: 'docker') {
+                        sh 'docker build -t image1 .'
+                        sh 'docker tag image1 arpita199812/boardgame-project:latest'
+                        sh 'docker push arpita199812/boardgame-project:latest'
                     }
                 }
             }
         }
 
-        stage('Set up Docker Buildx') {
+        stage('TRIVY') {
             steps {
-                script {
-                    sh 'docker buildx --version || docker buildx create --use'
-                }
+                sh 'trivy image arpita199812/boardgame-project:latest'
             }
-        }
-
-        stage('Docker Build and Push') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-key') {
-                    sh  'docker buildx build --platform linux/amd64,linux/arm64 -t arpita199812/boardgame-project:18 --push .'
-                       
-                    }
-                }
-            }
-        }
-
-        stage('Trivy Scan') {
-            steps {
-                script {
-                    sh 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image arpita199812/boardgame-project:18'
-                }
-            }
-        }
-
-        stage('OWASP ZAP Scan') {
-            steps {
-                script {
-                    sh 'docker run --rm -v ${WORKSPACE}:/zap/wrk/:rw -t zaproxy/zap-stable zap-baseline.py -t http://3.87.190.86:8080 -r zap_report.html'
-                }
-            }
-        }
-
-        stage('Run Docker Container') {
-            steps {
-                script {
-                    sh 'docker run -d -p 8080:8080 --name boardgame-container arpita199812/boardgame-project:18'
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
-        }
-
-        success {
-            script {
-                timeout(time: 1, unit: 'HOURS') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
-        failure {
-            echo 'Pipeline failed!'
         }
     }
 }
