@@ -45,8 +45,8 @@ pipeline {
             steps {
                 script {
                     env.DEPENDENCYCHECK_APIKEY = '6d6f8a54-3927-4686-96ad-e7cd1eb26044'
-                     dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP',
-                     dependencyCheckPublisher pattern: '/home/ubuntu/slave/workspace/pipeline/dependency-check-report.html'
+                     dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP'
+                     dependencyCheckPublisher pattern: '/home/ubuntu/slave/workspace/pipeline/dependency-check-report.xml'
                 }
             }
         }
