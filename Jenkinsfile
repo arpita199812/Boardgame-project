@@ -8,6 +8,7 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
+        DOCKER_CREDENTIALS_ID = 'docker-hub-id'
     }
 
     stages {
@@ -56,7 +57,7 @@ pipeline {
         stage('Docker Build & Push') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'dckr_pat_RbcgN4xuDHnHG02boDRo4Sh8hQU', toolName: 'docker') {
+                    withDockerRegistry('https://index.docker.io/v1/' , DOCKER_CREDENTIALS_ID, toolName: 'docker') {
                         sh 'docker build -t image1 .'
                         sh 'docker tag image1 arpita199812/boardgame-project:latest'
                         sh 'docker push arpita199812/boardgame-project:latest'
