@@ -45,8 +45,7 @@ pipeline {
             steps {
                 script {
                     env.DEPENDENCYCHECK_APIKEY = '6d6f8a54-3927-4686-96ad-e7cd1eb26044'
-                    dependencyCheck additionalArguments: '--failOnCVSS 7 --format XML --format HTML', 
-                                    odcInstallation: 'Dependency-Check 6.5.3'
+                     dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP', 
                 }
             }
         }
