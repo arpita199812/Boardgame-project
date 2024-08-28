@@ -9,6 +9,13 @@ pipeline {
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
+        AWS_REGION = 'us-east-1' 
+        ECR_REPOSITORY = 'boardgame-project' 
+        AWS_ACCOUNT_ID = '730335449419' 
+        ECS_CLUSTER = 'Boardgame-proj-cluster' 
+        ECS_SERVICE = 'your-ecs-service-name' 
+        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials' 
+        AWS_CREDENTIALS_ID = 'AWS-Credential-key' 
     }
 
     stages {
