@@ -43,8 +43,12 @@ pipeline {
 
         stage('OWASP Dependency Check') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./ --format HTML --nvdApiKey 6d6f8a54-3927-4686-96ad-e7cd1eb26044', odcInstallation: 'DP'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                script {
+                    env.DEPENDENCYCHECK_APIKEY = '6d6f8a54-3927-4686-96ad-e7cd1eb26044'
+                    dependencyCheck additionalArguments: '--failOnCVSS 7 --format XML --format HTML', 
+                                    odcInstallation: 'Dependency-Check 6.5.3', 
+                                    out: 'dependency-check-report'
+                }
             }
         }
 
@@ -57,7 +61,7 @@ pipeline {
         stage('Docker Build & Push') {
             steps {
                 script {
-                    withDockerRegistry('https://index.docker.io/v1/' , DOCKER_CREDENTIALS_ID, toolName: 'docker') {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
                         sh 'docker build -t image1 .'
                         sh 'docker tag image1 arpita199812/boardgame-project:latest'
                         sh 'docker push arpita199812/boardgame-project:latest'
@@ -70,6 +74,13 @@ pipeline {
             steps {
                 sh 'trivy image arpita199812/boardgame-project:latest'
             }
+        }
+    }
+
+    post {
+        always {
+            // Publish Dependency-Check reports
+            dependencyCheckPublisher pattern: 'dependency-check-report/dependency-check-report.xml'
         }
     }
 }
