@@ -42,7 +42,7 @@ pipeline {
 
         stage('OWASP Dependency Check') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./ --format HTML', odcInstallation: 'DP'
+                dependencyCheck additionalArguments: '--scan ./ --format HTML --nvdApiKey nvd-api-key', odcInstallation: 'DP'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
