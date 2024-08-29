@@ -301,14 +301,4 @@ This guide covers the detailed steps to set up a Jenkins-based CI/CD pipeline in
   - username: bugs    |     password: bunny (user role)
   - username: daffy   |     password: duck  (manager role)
 
-![Screenshot 2024-08-28 213244](https://github.com/user-attachments/assets/560cd6e7-2aee-45d7-9d51-95b44a5845c9)
-
-![Screenshot 2024-08-28 212941](https://github.com/user-attachments/assets/40f79f45-e489-434d-81db-543603433b86)
-
-![Screenshot 2024-08-28 213334](https://github.com/user-attachments/assets/ce9ecc80-c11c-4034-9dd5-522d489599c4)
-
-![Screenshot 2024-08-28 213437](https://github.com/user-attachments/assets/28c07e51-e715-40f9-8809-17f8ab443068)
-
-![Screenshot 2024-08-28 213448](https://github.com/user-attachments/assets/48801221-4db1-4324-9c51-dc74197ff7db)
-
 5. You can also sign-up as a new user and customize your role to play with the application! 😊
