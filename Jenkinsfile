@@ -49,7 +49,7 @@ pipeline {
         stage('OWASP Dependency Check') {
             steps {
                 script {
-                    env.DEPENDENCYCHECK_APIKEY = '6d6f8a54-3927-4686-96ad-e7cd1eb26044'
+                    env.DEPENDENCYCHECK_APIKEY = 'my-nvd-api-key'
                     dependencyCheck additionalArguments: '--scan ./ --format HTML ', odcInstallation: 'DP'
                     dependencyCheckPublisher pattern: '**/dependency-check-report.html'
                 }
@@ -68,7 +68,7 @@ pipeline {
                      withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
                      sh '''
                          # Get ECR login password and log in to Amazon ECR
-                         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 730335449419.dkr.ecr.us-east-1.amazonaws.com
+                         aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin <aws-account-id>.dkr.ecr.us-east-1.amazonaws.com
                     
                         # Verify login
                         docker info
@@ -77,10 +77,10 @@ pipeline {
                         docker build -t boardgame-project .
                     
                         # Tag Docker image
-                        docker tag boardgame-project:latest 730335449419.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest
+                        docker tag boardgame-project:latest <aws-account-id>.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest
                     
                         # Push Docker image to ECR
-                        docker push 730335449419.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest
+                        docker push <aws-account-id>.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest
                      '''
                    }
                }
@@ -107,7 +107,7 @@ pipeline {
 
         stage('TRIVY') {
             steps {
-                sh 'trivy image 730335449419.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest'
+                sh 'trivy image <aws-account-id>.dkr.ecr.us-east-1.amazonaws.com/boardgame-project:latest'
             }
         }
     }
