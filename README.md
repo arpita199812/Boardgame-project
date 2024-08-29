@@ -1,4 +1,4 @@
-# BoardgameListingWebApp
+# Detailed CI/CD Pipeline Setup for a Java Project using Jenkins, Docker, SonarQube, Trivy, and AWS ECS
 
 ## Description
 
